@@ -1,0 +1,205 @@
+/* USWDS component styles for the uswds-gsx components (button, input,
+   alert), written from the USWDS source anatomy (usa-button,
+   %block-input-styles, usa-alert) against the --usa-* tokens in
+   uswds-tokens.css — no USWDS CSS imported.
+
+   Theme awareness: every color reads a shadcn-style semantic token first
+   and falls back to the authentic USWDS primitive —
+   var(--primary, var(--usa-blue-60v)). In a bare project these render
+   stock USWDS; in a themed gsxui project (light/dark re-grades on
+   --primary, --ring, --input, ...) the components ride the theme
+   automatically.
+
+   Cascade position: everything sits in @layer components. Tailwind v4
+   orders layers theme < base < components < utilities, so caller utility
+   classes always win per property — same contract as gsxui's vendored
+   components. */
+
+@layer components {
+  /* ---- usa-button ------------------------------------------------------
+     Geometry from usa-button: bold weight, radius 4px, padding
+     units(1.5) units(2.5) = 12px 20px (≈ 40px tall at 1rem/1 line-height).
+     Interaction states darken along primary-dark/-darker — never an
+     opacity fade. Focus is the USWDS convention: 4px solid focus color,
+     offset 4px. */
+  .usa-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--usa-spacing-1);
+    padding: var(--usa-spacing-105) var(--usa-spacing-205);
+    border: 0;
+    border-radius: var(--usa-spacing-05);
+    background-color: var(--primary, var(--usa-blue-60v));
+    color: var(--primary-foreground, #fff);
+    font-family: inherit;
+    font-size: var(--usa-font-md);
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .usa-button:hover {
+    background-color: var(--primary-hover, var(--usa-blue-warm-70v));
+    color: var(--primary-foreground, #fff);
+    text-decoration: none;
+  }
+  .usa-button:active {
+    background-color: var(--primary-active, var(--usa-blue-warm-80v));
+  }
+  .usa-button:focus-visible {
+    outline: 0.25rem solid var(--ring, var(--usa-blue-40v));
+    outline-offset: 0.25rem;
+  }
+  .usa-button:disabled,
+  .usa-button[aria-disabled="true"] {
+    background-color: var(--usa-gray-cool-10);
+    color: var(--usa-gray-cool-60);
+    cursor: not-allowed;
+  }
+
+  /* usa-button--outline: transparent fill, primary text, 2px primary ring
+     drawn as an inset shadow (the USWDS mechanism — keeps the box identical
+     to the filled variants). */
+  .usa-button--outline {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--primary, var(--usa-blue-60v));
+    color: var(--primary, var(--usa-blue-60v));
+  }
+  .usa-button--outline:hover {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--primary-hover, var(--usa-blue-warm-70v));
+    color: var(--primary-hover, var(--usa-blue-warm-70v));
+  }
+  .usa-button--outline:active {
+    background-color: transparent;
+    box-shadow: inset 0 0 0 2px var(--primary-active, var(--usa-blue-warm-80v));
+    color: var(--primary-active, var(--usa-blue-warm-80v));
+  }
+
+  /* usa-button--base: the quiet gray button ("base" palette). */
+  .usa-button--base {
+    background-color: var(--usa-gray-cool-50);
+  }
+  .usa-button--base:hover {
+    background-color: var(--usa-gray-cool-60);
+  }
+  .usa-button--base:active {
+    background-color: var(--usa-gray-cool-70);
+  }
+
+  /* usa-button--secondary: USWDS's RED secondary palette (not a quiet
+     gray — see the component doc comment). */
+  .usa-button--secondary {
+    background-color: var(--usa-red-50);
+  }
+  .usa-button--secondary:hover {
+    background-color: var(--usa-red-60v);
+  }
+  .usa-button--secondary:active {
+    background-color: var(--usa-red-70v);
+  }
+
+  .usa-button--big {
+    padding: var(--usa-spacing-2) var(--usa-spacing-3);
+    font-size: var(--usa-font-lg);
+    border-radius: var(--usa-spacing-1);
+  }
+
+  /* usa-button--unstyled: renders as a link — the USWDS escape hatch for
+     button semantics without button chrome. */
+  .usa-button--unstyled {
+    padding: 0;
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--primary, var(--usa-blue-60v));
+    font-weight: 400;
+    text-decoration: underline;
+    white-space: normal;
+  }
+  .usa-button--unstyled:hover {
+    background-color: transparent;
+    color: var(--primary-hover, var(--usa-blue-warm-70v));
+  }
+  .usa-button--unstyled:active {
+    background-color: transparent;
+    color: var(--primary-active, var(--usa-blue-warm-80v));
+  }
+
+  /* ---- usa-input -------------------------------------------------------
+     %block-input-styles: 1px base-dark border, square corners, units(5) =
+     40px tall, units(1) = 8px side padding. Focus: 4px solid focus color
+     at offset 0, border unchanged. */
+  .usa-input {
+    display: block;
+    width: 100%;
+    height: var(--usa-spacing-5);
+    padding: var(--usa-spacing-05) var(--usa-spacing-1);
+    border: 1px solid var(--input, var(--usa-gray-cool-60));
+    border-radius: 0;
+    background-color: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: var(--usa-font-md);
+    line-height: 1.3;
+  }
+  .usa-input:focus-visible {
+    outline: 0.25rem solid var(--ring, var(--usa-blue-40v));
+    outline-offset: 0;
+  }
+  .usa-input::placeholder {
+    color: var(--muted-foreground, var(--usa-gray-cool-60));
+  }
+  .usa-input:disabled {
+    border-color: var(--usa-gray-cool-30);
+    color: var(--usa-gray-cool-50);
+    cursor: not-allowed;
+  }
+  .usa-input[aria-invalid="true"] {
+    border: 0.25rem solid var(--destructive, var(--usa-red-50));
+  }
+
+  /* ---- usa-alert (no-icon anatomy) --------------------------------------
+     Status-tinted panel, thick status-colored left bar, regular ink for
+     the copy. Tints read the theme's *-muted tokens first so themed dark
+     modes re-grade them; text falls back to near-black ink, which clears
+     AA on every stock tint. */
+  .usa-alert {
+    border-left: var(--usa-spacing-1) solid;
+    padding: var(--usa-spacing-2);
+    color: var(--foreground, var(--usa-gray-cool-90));
+  }
+  .usa-alert__body > * + * {
+    margin-top: var(--usa-spacing-1);
+  }
+  .usa-alert__heading {
+    font-size: var(--usa-font-lg);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .usa-alert__text {
+    margin: 0;
+    font-size: var(--usa-font-md);
+    line-height: 1.5;
+  }
+  .usa-alert--info {
+    border-left-color: var(--info, var(--usa-cyan-30v));
+    background-color: var(--info-muted, var(--usa-cyan-5));
+  }
+  .usa-alert--success {
+    border-left-color: var(--success, var(--usa-green-cool-40v));
+    background-color: var(--success-muted, var(--usa-green-cool-5));
+  }
+  .usa-alert--warning {
+    border-left-color: var(--warning, var(--usa-gold-20v));
+    background-color: var(--warning-muted, var(--usa-yellow-5));
+  }
+  .usa-alert--error {
+    border-left-color: var(--destructive, var(--usa-red-50));
+    background-color: var(--destructive-muted, var(--usa-red-warm-10));
+  }
+}

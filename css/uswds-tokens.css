@@ -1,0 +1,73 @@
+/* USWDS system design tokens as plain CSS custom properties — verbatim from
+   uswds-core (https://designsystem.digital.gov/design-tokens/), no USWDS CSS
+   or JS imported. Naming: --usa-<family>-<grade>[v]; grade is USWDS's
+   perceptual-lightness "magic number" (0 = white ... 100 = black). WCAG
+   contrast falls out of grade arithmetic: a difference of 40+ between text
+   and background is AA Large / 3:1 UI, 50+ is AA normal text, 70+ is AAA.
+
+   If your project already defines these (e.g. a hand-rolled USWDS theme
+   layer), import exactly one source — this file is the canonical set. */
+
+:root {
+  /* ---- Color primitives ---- */
+  --usa-blue-10: #d9e8f6;
+  --usa-blue-20: #aacdec;
+  --usa-blue-30: #73b3e7;
+  --usa-blue-40v: #2491ff;
+  --usa-blue-60v: #005ea2;
+  --usa-blue-70v: #0b4778;
+  --usa-blue-warm-70v: #1a4480;
+  --usa-blue-warm-80v: #162e51;
+  --usa-violet-30: #b8a2e3;
+  --usa-violet-70v: #54278f;
+  --usa-red-40: #e9695f;
+  --usa-red-50: #d83933;
+  --usa-red-60v: #b50909;
+  --usa-red-70v: #8b0a03;
+  --usa-red-warm-10: #f4e3db;
+  --usa-red-warm-80: #332d29;
+  --usa-gold-20v: #ffbe2e;
+  --usa-yellow-5: #faf3d1;
+  --usa-yellow-80v: #422d19;
+  --usa-green-cool-5: #ecf3ec;
+  --usa-green-cool-40v: #00a91c;
+  --usa-green-cool-80v: #19311e;
+  --usa-cyan-5: #e7f6f8;
+  --usa-cyan-30v: #00bde3;
+  --usa-cyan-80: #203133;
+  --usa-gray-cool-1: #fbfcfd;
+  --usa-gray-cool-2: #f7f9fa;
+  --usa-gray-cool-5: #edeff0;
+  --usa-gray-cool-10: #dfe1e2;
+  --usa-gray-cool-20: #c6cace;
+  --usa-gray-cool-30: #a9aeb1;
+  --usa-gray-cool-40: #8d9297;
+  --usa-gray-cool-50: #71767a;
+  --usa-gray-cool-60: #565c65;
+  --usa-gray-cool-70: #3d4551;
+  --usa-gray-cool-80: #2d2e2f;
+  --usa-gray-cool-90: #1c1d1f;
+
+  /* ---- Type scale (theme sizes, Public Sans) ---- */
+  --usa-font-3xs: 0.75rem; /* 12px */
+  --usa-font-2xs: 0.8125rem; /* 13px */
+  --usa-font-xs: 0.875rem; /* 14px */
+  --usa-font-sm: 0.9375rem; /* 15px */
+  --usa-font-md: 1rem; /* 16px */
+  --usa-font-lg: 1.375rem; /* 22px */
+  --usa-font-xl: 2rem; /* 32px */
+  --usa-font-2xl: 2.5rem; /* 40px */
+  --usa-font-3xl: 3rem; /* 48px */
+
+  /* ---- Spacing units (1 unit = 8px; "05" = half, "105" = 1.5) ---- */
+  --usa-spacing-05: 0.25rem; /* 4px */
+  --usa-spacing-1: 0.5rem; /* 8px */
+  --usa-spacing-105: 0.75rem; /* 12px */
+  --usa-spacing-2: 1rem; /* 16px */
+  --usa-spacing-205: 1.25rem; /* 20px */
+  --usa-spacing-3: 1.5rem; /* 24px */
+  --usa-spacing-4: 2rem; /* 32px */
+  --usa-spacing-5: 2.5rem; /* 40px */
+  --usa-spacing-6: 3rem; /* 48px */
+  --usa-spacing-8: 4rem; /* 64px */
+}
