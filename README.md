@@ -57,6 +57,28 @@ use `base` or `outline` for a subdued button.
 is ours — built from USWDS parts (the alert's status bar, list geometry)
 entirely on the same `--usa-*` tokens and naming conventions.
 
+Every screenshot below is the component rendered in isolation on stock
+USWDS tokens (no theme overrides) — regenerate them with the harness
+described under [Development](#development).
+
+### Button
+
+<img src="docs/screenshots/button.png" width="720" alt="USWDS button variants: primary, outline, base, secondary (red), big, unstyled, disabled">
+
+### Input
+
+<img src="docs/screenshots/input.png" width="760" alt="USWDS text input, default and invalid (red-bordered) states">
+
+The bare `usa-input`; `aria-invalid="true"` styles the error state.
+
+### Alert
+
+<img src="docs/screenshots/alert.png" width="760" alt="USWDS alerts in info, success, warning, and error variants">
+
+### Table
+
+<img src="docs/screenshots/table.png" width="407" alt="USWDS tables: striped with bordered cells, and a borderless compact variant">
+
 `Table` has no per-cell subcomponents — USWDS styles by descendant
 selector, so you write plain `<thead>`/`<tbody>`/`<tr>`/`<th>`/`<td>`
 (and an optional `<caption>`) as children:
@@ -65,6 +87,14 @@ selector, so you write plain `<thead>`/`<tbody>`/`<tr>`/`<th>`/`<td>`
         <thead><tr><th scope="col">Option</th><th scope="col">Cost</th></tr></thead>
         <tbody><tr><th scope="row">Alpha</th><td>120</td></tr></tbody>
     </uswds.Table>
+
+### Tag
+
+<img src="docs/screenshots/tag.png" width="249" alt="USWDS tags: two default-size labels and one big variant">
+
+### RankedList
+
+<img src="docs/screenshots/ranked-list.png" width="760" alt="Ranked list with green per-item status bars, muted items, trailing Funded tags, and a labeled budget waterline between items two and three">
 
 `RankedList` renders a numbered standing — Schulze results, leaderboards,
 priority queues — with an optional waterline marking where a cutoff falls
@@ -80,6 +110,10 @@ below it:
         waterline={1}
         waterlineLabel="budget line — 200 hours"
     />
+
+### Identicon
+
+<img src="docs/screenshots/identicon.png" width="366" alt="Twelve distinct identicon glyphs drawn from different seeds">
 
 `Identicon` is a zero-JS, zero-image deterministic glyph (qidenticon
 anatomy) for anchoring list rows to opaque IDs — the same seed always
@@ -104,3 +138,11 @@ draws the same face:
 `.gsx` sources live in `ui/`; committed `.x.go` files keep the module
 `go build`-able (consumers regenerate with their own gsx toolchain and
 class merger on `add`). Regenerate here with `go tool gsx generate`.
+
+The README screenshots come from `docs/harness`, which renders each
+component in isolation on stock tokens:
+
+    go run ./docs/harness -out /tmp/uswds-iso
+
+Screenshot each emitted page at an 800px-wide viewport (2× scale) and
+replace the images in `docs/screenshots/`.
