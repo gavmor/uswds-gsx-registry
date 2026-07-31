@@ -45,9 +45,47 @@ and use them beside your gsxui components:
 | `Button` | `usa-button` | `""` (primary), `outline`, `base`, `secondary`*, `big`, `unstyled` |
 | `Input` | `usa-input` | — (`aria-invalid` styles the error state) |
 | `Alert` (+`AlertHeading`, `AlertText`) | `usa-alert`, no-icon anatomy | `info` (default), `success`, `warning`, `error` |
+| `Table` | `usa-table` (+ scrollable container) | `""` (bordered), `striped`, `borderless`; `compact` and `scrollable` stack with any |
+| `Tag` | `usa-tag` | `big` |
+| `RankedList` | `usa-ranked-list` † | per-item `success` status bar and `muted` ink; labeled waterline cutoff |
+| `Identicon` | `usa-identicon` † | — (deterministic per seed; palette `--identicon-1..6`) |
 
 \* USWDS "secondary" is the **red** secondary palette, not a quiet gray —
 use `base` or `outline` for a subdued button.
+
+† Registry extension: no upstream USWDS component exists, so the anatomy
+is ours — built from USWDS parts (the alert's status bar, list geometry)
+entirely on the same `--usa-*` tokens and naming conventions.
+
+`Table` has no per-cell subcomponents — USWDS styles by descendant
+selector, so you write plain `<thead>`/`<tbody>`/`<tr>`/`<th>`/`<td>`
+(and an optional `<caption>`) as children:
+
+    <uswds.Table variant="striped" compact={true} scrollable={false}>
+        <thead><tr><th scope="col">Option</th><th scope="col">Cost</th></tr></thead>
+        <tbody><tr><th scope="row">Alpha</th><td>120</td></tr></tbody>
+    </uswds.Table>
+
+`RankedList` renders a numbered standing — Schulze results, leaderboards,
+priority queues — with an optional waterline marking where a cutoff falls
+(a budget line, a pass mark, the top-N fold). The line is an index, not an
+item property, because a greedy budget walk can still fund a cheap item
+below it:
+
+    <uswds.RankedList
+        items={[]uswds.RankedItem{
+            {Body: gsx.Text("Alpha"), Status: "success", Trailing: uswds.Tag(false, gsx.Text("Funded"), nil)},
+            {Body: gsx.Text("Beta"), Muted: true},
+        }}
+        waterline={1}
+        waterlineLabel="budget line — 200 hours"
+    />
+
+`Identicon` is a zero-JS, zero-image deterministic glyph (qidenticon
+anatomy) for anchoring list rows to opaque IDs — the same seed always
+draws the same face:
+
+    <uswds.Identicon seed={voterID}/>
 
 ## Design contract
 

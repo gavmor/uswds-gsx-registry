@@ -78,3 +78,124 @@ func TestAlertFamilies(t *testing.T) {
 		}
 	}
 }
+
+func TestTableVariants(t *testing.T) {
+	for variant, wantClass := range map[string]string{
+		"":           `class="usa-table"`,
+		"striped":    "usa-table--striped",
+		"borderless": "usa-table--borderless",
+	} {
+		html := render(t, Table(variant, false, false, gsx.Text("cells"), nil))
+		if !strings.Contains(html, wantClass) {
+			t.Errorf("variant %q: %s missing %q", variant, html, wantClass)
+		}
+		if strings.Contains(html, "usa-table-container--scrollable") {
+			t.Errorf("non-scrollable table must not render the container: %s", html)
+		}
+	}
+}
+
+func TestTableCompact(t *testing.T) {
+	html := render(t, Table("striped", true, false, gsx.Text("cells"), nil))
+	for _, want := range []string{"usa-table--striped", "usa-table--compact"} {
+		if !strings.Contains(html, want) {
+			t.Errorf("compact striped table missing %q: %s", want, html)
+		}
+	}
+}
+
+func TestTableScrollableContainer(t *testing.T) {
+	html := render(t, Table("", false, true, gsx.Text("cells"), gsx.AttrMap{"aria-label": "Wide data"}.ToAttrs()))
+	for _, want := range []string{
+		"usa-table-container--scrollable",
+		`tabindex="0"`,
+		`role="region"`,
+		`aria-label="Wide data"`,
+		`class="usa-table"`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("scrollable table missing %q: %s", want, html)
+		}
+	}
+}
+
+func TestTag(t *testing.T) {
+	html := render(t, Tag(false, gsx.Text("Winner"), nil))
+	if !strings.Contains(html, `class="usa-tag"`) || !strings.Contains(html, "Winner") {
+		t.Errorf("tag missing anatomy: %s", html)
+	}
+	if strings.Contains(html, "usa-tag--big") {
+		t.Errorf("small tag must not carry the big modifier: %s", html)
+	}
+	if big := render(t, Tag(true, gsx.Text("New"), nil)); !strings.Contains(big, "usa-tag--big") {
+		t.Errorf("big tag missing usa-tag--big: %s", big)
+	}
+}
+
+func TestRankedList(t *testing.T) {
+	items := []RankedItem{
+		{Body: gsx.Text("Alpha"), Status: "success", Trailing: Tag(false, gsx.Text("Funded"), nil)},
+		{Body: gsx.Text("Beta"), Status: "success"},
+		{Body: gsx.Text("Gamma"), Muted: true},
+	}
+	html := render(t, RankedList(items, 2, "budget line — 200 hours", nil))
+	for _, want := range []string{
+		"usa-ranked-list",
+		"usa-ranked-list__item--success",
+		"usa-ranked-list__item--muted",
+		"usa-ranked-list__waterline",
+		"budget line — 200 hours",
+		">1.<", ">2.<", ">3.<",
+		"usa-tag",
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("ranked list missing %q: %s", want, html)
+		}
+	}
+	// The waterline sits above item 3: Beta renders before the rule, Gamma after.
+	if strings.Index(html, "Beta") > strings.Index(html, "usa-ranked-list__waterline") ||
+		strings.Index(html, "usa-ranked-list__waterline") > strings.Index(html, "Gamma") {
+		t.Errorf("waterline not between items 2 and 3: %s", html)
+	}
+}
+
+func TestRankedListWithoutWaterline(t *testing.T) {
+	items := []RankedItem{{Body: gsx.Text("Alpha")}, {Body: gsx.Text("Beta")}}
+	for _, waterline := range []int{-1, len(items)} {
+		html := render(t, RankedList(items, waterline, "unused", nil))
+		if strings.Contains(html, "usa-ranked-list__waterline") {
+			t.Errorf("waterline %d should render no rule: %s", waterline, html)
+		}
+	}
+}
+
+func TestRankedListWaterlineAboveFirstItem(t *testing.T) {
+	items := []RankedItem{{Body: gsx.Text("Alpha"), Muted: true}}
+	html := render(t, RankedList(items, 0, "budget line", nil))
+	if strings.Index(html, "usa-ranked-list__waterline") > strings.Index(html, "Alpha") {
+		t.Errorf("waterline 0 should render before the first item: %s", html)
+	}
+}
+
+func TestIdenticonDeterministic(t *testing.T) {
+	a := render(t, Identicon("seed-1", nil))
+	if b := render(t, Identicon("seed-1", nil)); a != b {
+		t.Errorf("same seed must render byte-identical markup:\n%s\n%s", a, b)
+	}
+	if c := render(t, Identicon("seed-2", nil)); a == c {
+		t.Errorf("different seeds should draw different faces: %s", a)
+	}
+	for _, want := range []string{"usa-identicon", `aria-hidden="true"`, "<polygon", "data-hue="} {
+		if !strings.Contains(a, want) {
+			t.Errorf("identicon missing %q: %s", want, a)
+		}
+	}
+}
+
+func TestIdenticonTwoDistinctHues(t *testing.T) {
+	for _, seed := range []string{"a", "b", "c", "voter-42", "long-opaque-id"} {
+		if identiconHue(seed) == identiconSecondHue(seed) {
+			t.Errorf("seed %q: primary and secondary hue collapsed to %d", seed, identiconHue(seed))
+		}
+	}
+}

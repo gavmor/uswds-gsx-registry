@@ -1,0 +1,189 @@
+package uswds
+
+import (
+	"hash/fnv"
+	"strconv"
+	"strings"
+
+	"github.com/gsxhq/gsx"
+)
+
+// Identicon is a deterministic decorative glyph for an opaque ID, drawn to
+// qidenticon anatomy (Bitmessage's identicon, geometry ported from
+// github.com/fivenp/go-identicon): a 3×3 grid of geometric patches — one
+// center shape, four sides, four corners — where the sides and corners each
+// repeat one shape rotated a quarter-turn per step, so every face is 4-fold
+// rotationally symmetric, a pinwheel rather than pixel noise. It gives a
+// list row a stable visual anchor — the same seed always draws the same
+// face — with no image bytes, no endpoint, no JS, and no library behind it.
+// Not a stock USWDS component (registry extension); the palette rides the
+// usa-* tokens.
+//
+// Two hues per face (qidenticon's TwoColor), distinct by construction. Each
+// patch carries a data-hue attribute; the fills live in
+// css/uswds-components.css as var(--identicon-N, <usa primitive>), so a
+// themed project (dark-mode re-grades, brand palettes) swaps the six
+// --identicon-* tokens without touching markup, and a bare project renders
+// six USWDS families. aria-hidden: the identicon is decoration — the row's
+// text stays the accessible label. Markup is a pure function of seed, so
+// live-region re-renders swap to byte-identical rows (no flicker) and
+// cloned drag ghosts carry the face for free. Extra attributes fall through
+// to the <svg>.
+component Identicon(seed string, attrs gsx.Attrs) {
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 12 12"
+		aria-hidden="true"
+		focusable="false"
+		data-slot="identicon"
+		class="usa-identicon"
+		{ attrs... }
+	>
+		{ for _, p := range identiconPatches(seed) {
+			<polygon points={identiconPoints(p.points)} data-hue={strconv.Itoa(p.hue)}/>
+		} }
+	</svg>
+}
+
+// identiconHues is the size of the --identicon-* palette in
+// css/uswds-components.css.
+const identiconHues = 6
+
+// identiconPatch is one drawn shape: a polygon in the 12×12 viewBox and the
+// 1-based --identicon-N token that fills it.
+type identiconPatch struct {
+	points [][2]int
+	hue    int
+}
+
+// identiconBits hashes the seed once (FNV-1a); every choice below is a bit
+// field of this one word, so the whole face is a pure function of the seed.
+func identiconBits(seed string) uint32 {
+	h := fnv.New32a()
+	h.Write([]byte(seed))
+	return h.Sum32()
+}
+
+// identiconHue maps a seed onto the 1-based --identicon-N token index of the
+// face's primary (side-patch) hue.
+func identiconHue(seed string) int {
+	return int(identiconBits(seed)>>15%identiconHues) + 1
+}
+
+// identiconSecondHue picks the second hue (corner patches, usually the
+// middle) a nonzero palette-distance 1–5 from the primary, so the two tones
+// of a face never collapse into one.
+func identiconSecondHue(seed string) int {
+	fore := identiconHue(seed)
+	return (fore+int(identiconBits(seed)>>18%(identiconHues-1)))%identiconHues + 1
+}
+
+// identiconPatches lays out the nine qidenticon patches, mirroring the
+// reference Render's bit slicing and placement: 2 bits pick the middle shape
+// (from the symmetric middlePatchSet), 4+2 pick the corner shape and its
+// starting turn, 4+2 the sides', and one bit (swapCross) decides whether the
+// middle takes the primary or secondary hue. Each ring's turn advances one
+// quarter per patch — the rotational symmetry that makes the bits read as a
+// figure. The one departure: a seed whose middle, side, and corner shapes
+// are all the empty patch would draw a blank tile — a useless anchor — so
+// that face falls back to a full-square middle, still a pure function of
+// the seed.
+func identiconPatches(seed string) []identiconPatch {
+	bits := identiconBits(seed)
+	middle := identiconMiddlePatchSet[bits&0x03]
+	corner := int(bits >> 2 & 0x0f)
+	cornerTurn := int(bits >> 6 & 0x03)
+	side := int(bits >> 8 & 0x0f)
+	sideTurn := int(bits >> 12 & 0x03)
+	swapCross := bits>>14&0x01 == 1
+	if middle == identiconEmptyPatch && side == identiconEmptyPatch && corner == identiconEmptyPatch {
+		middle = 0
+	}
+
+	fore, second := identiconHue(seed), identiconSecondHue(seed)
+	middleHue := second
+	if swapCross {
+		middleHue = fore
+	}
+
+	var patches []identiconPatch
+	if pts := identiconPatchPoints(middle, 1, 1, 0); pts != nil {
+		patches = append(patches, identiconPatch{pts, middleHue})
+	}
+	for i, pos := range [4][2]int{{1, 0}, {2, 1}, {1, 2}, {0, 1}} {
+		if pts := identiconPatchPoints(side, pos[0], pos[1], sideTurn+1+i); pts != nil {
+			patches = append(patches, identiconPatch{pts, fore})
+		}
+	}
+	for i, pos := range [4][2]int{{0, 0}, {2, 0}, {2, 2}, {0, 2}} {
+		if pts := identiconPatchPoints(corner, pos[0], pos[1], cornerTurn+1+i); pts != nil {
+			patches = append(patches, identiconPatch{pts, second})
+		}
+	}
+	return patches
+}
+
+// identiconPatchPoints instantiates one patch: the shape's base vertices
+// spun turn quarter-turns about the patch center (2,2) — (x,y) → (4−y,x) per
+// turn, matching the reference's clockwise RotateAbout — then translated to
+// the patch cell. All coordinates stay small integers, so the serialized
+// markup is byte-stable by construction. Empty shapes yield nil.
+func identiconPatchPoints(shape, cellX, cellY, turn int) [][2]int {
+	base := identiconPathSet[shape]
+	if len(base) == 0 {
+		return nil
+	}
+	turn %= 4
+	pts := make([][2]int, len(base))
+	for i, p := range base {
+		x, y := p[0], p[1]
+		for t := 0; t < turn; t++ {
+			x, y = 4-y, x
+		}
+		pts[i] = [2]int{x + 4*cellX, y + 4*cellY}
+	}
+	return pts
+}
+
+// identiconPoints serializes a patch for the SVG points attribute.
+func identiconPoints(pts [][2]int) string {
+	var b strings.Builder
+	for i, p := range pts {
+		if i > 0 {
+			b.WriteByte(' ')
+		}
+		b.WriteString(strconv.Itoa(p[0]))
+		b.WriteByte(',')
+		b.WriteString(strconv.Itoa(p[1]))
+	}
+	return b.String()
+}
+
+// identiconPathSet is qidenticon's sixteen patch shapes, verbatim from the
+// reference: vertices on a 4×4 patch-local lattice.
+var identiconPathSet = [16][][2]int{
+	{{0, 0}, {4, 0}, {4, 4}, {0, 4}},                         // full square
+	{{0, 0}, {4, 0}, {0, 4}},                                 // right triangle, top-left
+	{{2, 0}, {4, 4}, {0, 4}},                                 // upward triangle
+	{{0, 0}, {2, 0}, {2, 4}, {0, 4}},                         // left half rectangle
+	{{2, 0}, {4, 2}, {2, 4}, {0, 2}},                         // diamond
+	{{0, 0}, {4, 2}, {4, 4}, {2, 4}},                         // kite, top-left
+	{{2, 0}, {4, 4}, {2, 4}, {3, 2}, {1, 2}, {2, 4}, {0, 4}}, // fractal triangles
+	{{0, 0}, {4, 2}, {2, 4}},                                 // sharp triangle, top-left
+	{{1, 1}, {3, 1}, {3, 3}, {1, 3}},                         // small centered square
+	{{2, 0}, {4, 0}, {0, 4}, {0, 2}, {2, 2}},                 // two small triangles
+	{{0, 0}, {2, 0}, {2, 2}, {0, 2}},                         // small top-left square
+	{{0, 2}, {4, 2}, {2, 4}},                                 // down triangle on bottom
+	{{2, 2}, {4, 4}, {0, 4}},                                 // up triangle on bottom
+	{{2, 0}, {2, 2}, {0, 2}},                                 // small triangle, bottom-right-pointing
+	{{0, 0}, {2, 0}, {0, 2}},                                 // small triangle, top-left-pointing
+	{},                                                       // empty
+}
+
+// identiconEmptyPatch indexes the empty shape in identiconPathSet.
+const identiconEmptyPatch = 15
+
+// identiconMiddlePatchSet restricts the middle to the shapes that are
+// themselves 4-fold symmetric (square, diamond, small square, empty), so the
+// whole face keeps its rotational symmetry.
+var identiconMiddlePatchSet = [4]int{0, 4, 8, 15}

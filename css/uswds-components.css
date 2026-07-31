@@ -1,7 +1,9 @@
 /* USWDS component styles for the uswds-gsx components (button, input,
-   alert), written from the USWDS source anatomy (usa-button,
-   %block-input-styles, usa-alert) against the --usa-* tokens in
-   uswds-tokens.css — no USWDS CSS imported.
+   alert, table, tag, ranked-list, identicon), written from the USWDS
+   source anatomy (usa-button, %block-input-styles, usa-alert, usa-table,
+   usa-tag) against the --usa-* tokens in uswds-tokens.css — no USWDS CSS
+   imported. ranked-list and identicon are registry extensions (no
+   upstream USWDS anatomy) on the same tokens.
 
    Theme awareness: every color reads a shadcn-style semantic token first
    and falls back to the authentic USWDS primitive —
@@ -201,5 +203,176 @@
   .usa-alert--error {
     border-left-color: var(--destructive, var(--usa-red-50));
     background-color: var(--destructive-muted, var(--usa-red-warm-10));
+  }
+
+  /* ---- usa-table ---------------------------------------------------------
+     Bordered by default (1px ink borders, USWDS's high-certainty look),
+     header cells on a light gray field. Cell padding units(1) units(2) =
+     8px 16px; compact drops to 4px 12px. Styling is by descendant
+     selector — callers write plain thead/tbody/th/td. */
+  .usa-table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    color: var(--foreground, var(--usa-gray-cool-90));
+    font-size: var(--usa-font-md);
+    line-height: 1.5;
+    text-align: left;
+  }
+  .usa-table caption {
+    margin-bottom: var(--usa-spacing-05);
+    font-size: var(--usa-font-xs);
+    font-weight: 700;
+    text-align: left;
+  }
+  .usa-table th,
+  .usa-table td {
+    border: 1px solid var(--border, var(--usa-gray-cool-90));
+    padding: var(--usa-spacing-1) var(--usa-spacing-2);
+  }
+  .usa-table thead th,
+  .usa-table thead td {
+    background-color: var(--muted, var(--usa-gray-cool-10));
+    font-weight: 700;
+  }
+  .usa-table--striped tbody tr:nth-child(odd) th,
+  .usa-table--striped tbody tr:nth-child(odd) td {
+    background-color: var(--muted, var(--usa-gray-cool-5));
+  }
+  .usa-table--borderless th,
+  .usa-table--borderless td {
+    border-left: 0;
+    border-right: 0;
+  }
+  .usa-table--borderless thead th,
+  .usa-table--borderless thead td {
+    background-color: transparent;
+    border-top: 0;
+  }
+  .usa-table--compact th,
+  .usa-table--compact td {
+    padding: var(--usa-spacing-05) var(--usa-spacing-105);
+  }
+  /* The scrollable container is a focusable overflow region (the component
+     renders it with tabindex="0" role="region") so keyboard users can pan
+     a wide table; the focus ring is the USWDS convention. */
+  .usa-table-container--scrollable {
+    margin: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  .usa-table-container--scrollable:focus-visible {
+    outline: 0.25rem solid var(--ring, var(--usa-blue-40v));
+    outline-offset: 0;
+  }
+
+  /* ---- usa-tag -----------------------------------------------------------
+     The small uppercase state label, one neutral gray (base-dark). 2px
+     radius is USWDS's radius-sm. In a themed dark mode the semantic pair
+     inverts (light field, dark text) and stays readable. */
+  .usa-tag {
+    display: inline-block;
+    padding: 1px var(--usa-spacing-1);
+    border-radius: 2px;
+    background-color: var(--muted-foreground, var(--usa-gray-cool-60));
+    color: var(--background, #fff);
+    font-size: var(--usa-font-2xs);
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .usa-tag--big {
+    padding: var(--usa-spacing-05) var(--usa-spacing-1);
+    font-size: var(--usa-font-sm);
+  }
+
+  /* ---- usa-ranked-list (registry extension) ------------------------------
+     A numbered standing: quiet 1px row dividers, a 4px left status gutter
+     on every row (transparent unless the row earns a color — rows stay
+     column-aligned), muted ink for items out of the running, and a
+     labeled waterline rule marking a cutoff (budget line, pass mark,
+     top-N fold). Status bar anatomy and color mirror usa-alert. */
+  .usa-ranked-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .usa-ranked-list__item {
+    display: flex;
+    align-items: center;
+    gap: var(--usa-spacing-1);
+    border-bottom: 1px solid var(--border, var(--usa-gray-cool-10));
+    border-left: var(--usa-spacing-05) solid transparent;
+    padding: var(--usa-spacing-1) 0 var(--usa-spacing-1) var(--usa-spacing-1);
+  }
+  .usa-ranked-list__item:last-child {
+    border-bottom: 0;
+  }
+  .usa-ranked-list__item--success {
+    border-left-color: var(--success, var(--usa-green-cool-40v));
+  }
+  .usa-ranked-list__item--muted {
+    color: var(--muted-foreground, var(--usa-gray-cool-60));
+  }
+  .usa-ranked-list__rank {
+    min-width: var(--usa-spacing-3);
+    color: var(--muted-foreground, var(--usa-gray-cool-60));
+    font-size: var(--usa-font-xs);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .usa-ranked-list__body {
+    flex: 1;
+    min-width: 0;
+    overflow-wrap: break-word;
+    font-size: var(--usa-font-xs);
+  }
+  .usa-ranked-list__waterline {
+    display: flex;
+    align-items: center;
+    gap: var(--usa-spacing-1);
+    padding: var(--usa-spacing-05) 0;
+    color: var(--primary, var(--usa-blue-60v));
+    font-size: var(--usa-font-3xs);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .usa-ranked-list__waterline::before,
+  .usa-ranked-list__waterline::after {
+    content: "";
+    flex: 1;
+    border-top: 2px solid currentColor;
+  }
+
+  /* ---- usa-identicon (registry extension) --------------------------------
+     Deterministic decorative glyph; size overridable per call site. The
+     six-hue palette reads --identicon-N first so generated themes and
+     dark-mode re-grades swap it wholesale; the fallbacks span six USWDS
+     families at glyph-legible grades. */
+  .usa-identicon {
+    width: var(--usa-spacing-3);
+    height: var(--usa-spacing-3);
+    flex-shrink: 0;
+    border-radius: 2px;
+    background-color: var(--muted, var(--usa-gray-cool-5));
+  }
+  .usa-identicon [data-hue="1"] {
+    fill: var(--identicon-1, var(--usa-blue-60v));
+  }
+  .usa-identicon [data-hue="2"] {
+    fill: var(--identicon-2, var(--usa-cyan-30v));
+  }
+  .usa-identicon [data-hue="3"] {
+    fill: var(--identicon-3, var(--usa-green-cool-40v));
+  }
+  .usa-identicon [data-hue="4"] {
+    fill: var(--identicon-4, var(--usa-gold-20v));
+  }
+  .usa-identicon [data-hue="5"] {
+    fill: var(--identicon-5, var(--usa-red-50));
+  }
+  .usa-identicon [data-hue="6"] {
+    fill: var(--identicon-6, var(--usa-violet-70v));
   }
 }
