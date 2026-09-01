@@ -132,6 +132,18 @@ func pages() map[string]gsx.Node {
 				</tbody>`), nil),
 		),
 
+		"modal": uswds.Modal("Close", gsx.Fragment(
+			uswds.ModalHeading(gsx.Text("You Voted!"), gsx.AttrMap{"id": "example-modal-heading"}.ToAttrs()),
+			gsx.Raw(`<p id="example-modal-description">Your ballot is continuously synced with the rest, so every change you make will be reflected immediately in the results.</p>`),
+			uswds.ModalFooter(
+				uswds.Button("", "", false, gsx.Text("Got it"), nil), nil,
+			),
+		), gsx.AttrMap{
+			"open":             "true", // static render for the screenshot — no JS harness to call showModal()
+			"aria-labelledby":  "example-modal-heading",
+			"aria-describedby": "example-modal-description",
+		}.ToAttrs()),
+
 		"tag": row(
 			uswds.Tag(false, gsx.Text("Winner"), nil),
 			uswds.Tag(false, gsx.Text("Funded"), nil),

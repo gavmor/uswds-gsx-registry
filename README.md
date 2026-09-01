@@ -47,6 +47,7 @@ and use them beside your gsxui components:
 | `Alert` (+`AlertHeading`, `AlertText`) | `usa-alert`, no-icon anatomy | `info` (default), `success`, `warning`, `error` |
 | `Table` | `usa-table` (+ scrollable container) | `""` (bordered), `striped`, `borderless`; `compact` and `scrollable` stack with any |
 | `Tag` | `usa-tag` | `big` |
+| `Modal` (+`ModalHeading`, `ModalFooter`) | `usa-modal` ‡ | — (native `<dialog>`; no `size` variant yet) |
 | `RankedList` | `usa-ranked-list` † | per-item `success` status bar and `muted` ink; labeled waterline cutoff |
 | `Identicon` | `usa-identicon` † | — (deterministic per seed; palette `--identicon-1..6`) |
 
@@ -56,6 +57,14 @@ use `base` or `outline` for a subdued button.
 † Registry extension: no upstream USWDS component exists, so the anatomy
 is ours — built from USWDS parts (the alert's status bar, list geometry)
 entirely on the same `--usa-*` tokens and naming conventions.
+
+‡ Registry-original interaction, real USWDS anatomy: `usa-modal`'s
+markup (`usa-modal__content`, `usa-modal__main`, `usa-modal__heading`,
+`usa-modal__footer`, `usa-modal__close`) is authentic USWDS, but this
+registry ships no JS anywhere, so `Modal` renders it onto a native
+`<dialog>` instead of USWDS's own `usa-modal-wrapper`/`usa-modal-overlay`
+pair and the JS behavior module behind them — the platform's own
+`.showModal()`/`::backdrop`/focus-trap already do that job for free.
 
 Every screenshot below is the component rendered in isolation on stock
 USWDS tokens (no theme overrides) — regenerate them with the harness
@@ -91,6 +100,38 @@ selector, so you write plain `<thead>`/`<tbody>`/`<tr>`/`<th>`/`<td>`
 ### Tag
 
 <img src="docs/screenshots/tag.png" width="249" alt="USWDS tags: two default-size labels and one big variant">
+
+### Modal
+
+<img src="docs/screenshots/modal.png" width="480" alt="A USWDS modal reading You Voted! with body copy, a Got it button, and a corner close button">
+
+`Modal` renders straight onto a native `<dialog>` — no vendored JS, no
+`usa-modal-wrapper`/`usa-modal-overlay` pair to toggle visibility on.
+Open it with `dialog.showModal()` (an `autoopen`-style attribute plus a
+small `htmx:afterSwap`/`DOMContentLoaded` listener is the usual shape in
+an htmx app) or wire every open/close through `<form method="dialog">`
+buttons, which need no JS of the caller's at all — the example below
+does exactly that for its close affordances, and only needs a script for
+opening it in the first place:
+
+    <uswds.Modal
+        id="example-modal"
+        aria-labelledby="example-modal-heading"
+        aria-describedby="example-modal-description"
+    >
+        <uswds.ModalHeading id="example-modal-heading">Are you sure?</uswds.ModalHeading>
+        <p id="example-modal-description">You have unsaved changes that will be lost.</p>
+        <uswds.ModalFooter>
+            <form method="dialog">
+                <uswds.Button type="submit">Continue without saving</uswds.Button>
+            </form>
+        </uswds.ModalFooter>
+    </uswds.Modal>
+
+`aria-labelledby`/`aria-describedby` aren't automatic — USWDS's own
+markup convention assumes them, but a bare `<dialog>` has no implicit
+label wiring, so point them at your heading/description ids yourself,
+same as the example above.
 
 ### RankedList
 

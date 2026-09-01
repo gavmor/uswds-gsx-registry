@@ -199,3 +199,51 @@ func TestIdenticonTwoDistinctHues(t *testing.T) {
 		}
 	}
 }
+
+func TestModalRendersAnatomyOnANativeDialog(t *testing.T) {
+	html := render(t, Modal("", gsx.Text("body"), nil))
+	for _, want := range []string{
+		"<dialog", `class="usa-modal"`, "usa-modal__content", "usa-modal__main",
+		"usa-modal__close", `method="dialog"`, "body",
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("modal missing %q: %s", want, html)
+		}
+	}
+	if !strings.Contains(html, `aria-label="Close"`) {
+		t.Errorf("modal's close button should default aria-label to Close: %s", html)
+	}
+}
+
+func TestModalCloseLabelOverride(t *testing.T) {
+	html := render(t, Modal("Dismiss this notice", gsx.Text("body"), nil))
+	if !strings.Contains(html, `aria-label="Dismiss this notice"`) {
+		t.Errorf("modal should render the given closeLabel: %s", html)
+	}
+}
+
+func TestModalAttrsPassThroughToTheDialogElement(t *testing.T) {
+	attrs := gsx.AttrMap{"id": "example-modal", "aria-labelledby": "example-modal-heading"}.ToAttrs()
+	html := render(t, Modal("", gsx.Text("body"), attrs))
+	for _, want := range []string{`id="example-modal"`, `aria-labelledby="example-modal-heading"`} {
+		if !strings.Contains(html, want) {
+			t.Errorf("modal missing passed-through attr %q: %s", want, html)
+		}
+	}
+}
+
+func TestModalHeadingAndFooter(t *testing.T) {
+	html := render(t, ModalHeading(gsx.Text("Are you sure?"), nil))
+	for _, want := range []string{"usa-modal__heading", "Are you sure?"} {
+		if !strings.Contains(html, want) {
+			t.Errorf("modal heading missing %q: %s", want, html)
+		}
+	}
+
+	html = render(t, ModalFooter(gsx.Text("actions"), nil))
+	for _, want := range []string{"usa-modal__footer", "actions"} {
+		if !strings.Contains(html, want) {
+			t.Errorf("modal footer missing %q: %s", want, html)
+		}
+	}
+}

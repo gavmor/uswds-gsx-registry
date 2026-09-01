@@ -1,9 +1,14 @@
 /* USWDS component styles for the uswds-gsx components (button, input,
-   alert, table, tag, ranked-list, identicon), written from the USWDS
-   source anatomy (usa-button, %block-input-styles, usa-alert, usa-table,
-   usa-tag) against the --usa-* tokens in uswds-tokens.css — no USWDS CSS
-   imported. ranked-list and identicon are registry extensions (no
-   upstream USWDS anatomy) on the same tokens.
+   alert, table, tag, modal, ranked-list, identicon), written from the
+   USWDS source anatomy (usa-button, %block-input-styles, usa-alert,
+   usa-table, usa-tag, usa-modal) against the --usa-* tokens in
+   uswds-tokens.css — no USWDS CSS imported. ranked-list and identicon are
+   registry extensions (no upstream USWDS anatomy) on the same tokens.
+   modal is a middle case: usa-modal's anatomy IS real USWDS, but its
+   interaction model is registry-original — these rules style a native
+   <dialog> (see ui/modal.gsx's doc comment) rather than USWDS's own
+   usa-modal-wrapper/usa-modal-overlay pair, which this registry doesn't
+   ship the JS for.
 
    Theme awareness: every color reads a shadcn-style semantic token first
    and falls back to the authentic USWDS primitive —
@@ -283,6 +288,63 @@
   .usa-tag--big {
     padding: var(--usa-spacing-05) var(--usa-spacing-1);
     font-size: var(--usa-font-sm);
+  }
+
+  /* ---- usa-modal (native <dialog>, not usa-modal-wrapper) -----------------
+     background/color read --popover (shadcn's floating-surface token —
+     the semantically closer match for a dialog than --card, and it
+     defaults to white, same as stock USWDS's literal background: white).
+     Radius matches usa-button's var(--usa-spacing-05), USWDS's own
+     $theme-modal-border-radius default. No .usa-modal--lg size variant —
+     nothing in this registry's own components needs one; a consumer app
+     can add it the same way if it does. */
+  .usa-modal {
+    max-width: 30rem;
+    width: 100%;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--usa-spacing-05);
+    background: var(--popover, #fff);
+    color: var(--popover-foreground, var(--usa-gray-cool-90));
+  }
+  .usa-modal::backdrop {
+    background: rgb(0 0 0 / 70%);
+  }
+  .usa-modal__content {
+    position: relative;
+    padding-top: var(--usa-spacing-4);
+  }
+  .usa-modal__main {
+    padding: var(--usa-spacing-1) var(--usa-spacing-4) var(--usa-spacing-4);
+  }
+  .usa-modal__heading {
+    margin: 0 0 var(--usa-spacing-1);
+    font-size: var(--usa-font-lg);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .usa-modal__footer {
+    margin-top: var(--usa-spacing-3);
+  }
+  .usa-modal__close {
+    position: absolute;
+    top: var(--usa-spacing-2);
+    right: var(--usa-spacing-2);
+    padding: var(--usa-spacing-1);
+    border: 0;
+    background: transparent;
+    color: var(--muted-foreground, var(--usa-gray-cool-50));
+    font-size: var(--usa-font-lg);
+    line-height: 1;
+    cursor: pointer;
+  }
+  .usa-modal__close:hover {
+    color: var(--foreground, var(--usa-gray-cool-90));
+  }
+  .usa-modal__close:focus-visible {
+    outline: 0.25rem solid var(--ring, var(--usa-blue-40v));
+    outline-offset: 0.25rem;
   }
 
   /* ---- usa-ranked-list (registry extension) ------------------------------
